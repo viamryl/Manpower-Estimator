@@ -7,6 +7,13 @@ from kivy.uix.textinput import TextInput
 from kivy.uix.spinner import Spinner
 from kivy.uix.scrollview import ScrollView
 from kivy.core.window import Window
+from kivy.uix.button import Button
+from kivy.uix.filechooser import FileChooserIconView
+from kivy.uix.popup import Popup
+from kivy.uix.actionbar import ActionBar, ActionView, ActionPrevious, ActionButton
+from tkinter import Tk, filedialog
+import json
+import os
 import locale
 
 locale.setlocale(locale.LC_ALL, '')
@@ -43,6 +50,27 @@ class ManpowerCalculatorApp(App):
         # Bungkus GridLayout dalam ScrollView
         scroll_view = ScrollView(size_hint=(1, 1))
 
+        # ** MENU BAR **
+        self.menu_bar = ActionBar()
+        action_view = ActionView()
+        action_view.add_widget(ActionPrevious(title="Manpower Estimator", with_previous=False))
+
+        # Tombol Save
+        save_button = ActionButton(text="Save As")
+        save_button.bind(on_release=self.show_save_dialog)
+        action_view.add_widget(save_button)
+
+        # Tombol Load
+        load_button = ActionButton(text="Load File")
+        load_button.bind(on_release=self.show_load_dialog)
+        action_view.add_widget(load_button)
+
+        self.menu_bar.add_widget(action_view)
+
+        # Tambahkan menu bar ke root layout
+        self.root.add_widget(self.menu_bar)
+
+
         # GridLayout untuk tabel utama
         self.main_layout = GridLayout(cols=1, spacing=10, size_hint_y=None)
         self.main_layout.bind(minimum_height=self.main_layout.setter('height'))
@@ -67,11 +95,11 @@ class ManpowerCalculatorApp(App):
         input_layout = BoxLayout(orientation='horizontal', size_hint_y=None, height=40, spacing=10)
 
         # TextInput pertama dengan lebar 250
-        self.salary_input = TextInput(hint_text="Avg Salary (Juta Rupiah)", multiline=False, size_hint=(None, None), width=220, height=40)
+        self.salary_input = TextInput(hint_text="Avg Salary (Juta Rupiah)", multiline=False, size_hint=(None, None), width=220, height=40, write_tab = False)
         input_layout.add_widget(self.salary_input)
 
         # TextInput kedua dengan lebar 250
-        self.profit_percentage = TextInput(hint_text="Profit Percentage (0.0 - 1.0)", multiline=False, size_hint=(None, None), width=250, height=40)
+        self.profit_percentage = TextInput(hint_text="Profit Percentage (0.0 - 1.0)", multiline=False, size_hint=(None, None), width=250, height=40, write_tab = False)
         input_layout.add_widget(self.profit_percentage)
 
         # Label total salary
@@ -274,6 +302,92 @@ class ManpowerCalculatorApp(App):
         self.profit.text = "Profit : Rp{:,.0f}".format(profit_total)
         self.total_people.text = f"Total People : {mp*1.40:.0f}"
         
+    def show_save_dialog(self, instance):
+        """Menampilkan dialog save file khas Windows"""
+        Tk().withdraw()  # Sembunyikan jendela utama Tkinter
+        file_path = filedialog.asksaveasfilename(
+            defaultextension=".json",
+            filetypes=[("JSON Files", "*.json"), ("All Files", "*.*")]
+        )
+        if file_path:
+            self.save_data(file_path)
+
+    def show_load_dialog(self, instance):
+        """Menampilkan dialog open file khas Windows"""
+        Tk().withdraw()
+        file_path = filedialog.askopenfilename(
+            filetypes=[("JSON Files", "*.json"), ("All Files", "*.*")]
+        )
+        if file_path:
+            self.load_data(file_path)
+
+    def save_data(self, file_path):
+        """Menyimpan semua data input ke dalam file JSON"""
+        data = {
+            "salary_input": self.salary_input.text,
+            "profit_percentage": self.profit_percentage.text,
+            "rows": []
+        }
+        
+        for group in self.main_layout.children:
+            if isinstance(group, BoxLayout):
+                for row in group.children:
+                    if isinstance(row, GridLayout) and len(row.children) == 9:
+                        row_data = {
+                            "label": row.children[8].text,  # Label deskripsi
+                            "qty": row.children[7].text,
+                            "uom": row.children[6].text,
+                            "productivity": row.children[5].text,
+                            "duration": row.children[4].text,
+                            "tpp": row.children[3].text,
+                            "manpower": row.children[2].text,
+                            "salary_month": row.children[1].text,
+                            "total_salary": row.children[0].text
+                        }
+                        data["rows"].append(row_data)
+        
+        with open(file_path, "w") as file:
+            json.dump(data, file, indent=4)
+        
+        print(f"Data saved successfully at {file_path}")
+
+
+    def load_data(self, file_path):
+        """Memuat data dari file JSON dan memperbarui UI"""
+        try:
+            with open(file_path, "r") as file:
+                data = json.load(file)
+            
+            # Muat nilai global
+            self.salary_input.text = data.get("salary_input", "")
+            self.profit_percentage.text = data.get("profit_percentage", "")
+            
+            # Bersihkan layout utama sebelum memuat data baru
+            for group in self.main_layout.children[:]:
+                if isinstance(group, BoxLayout):
+                    self.main_layout.remove_widget(group)
+            
+            # Tambahkan kembali data dari file
+            for row_data in data.get("rows", []):
+                group_layout = BoxLayout(orientation='vertical', size_hint_y=None)
+                self.main_layout.add_widget(group_layout)
+                
+                self.add_input_row(group_layout, row_data["label"])
+                row = group_layout.children[0]
+                
+                row.children[7].text = row_data.get("qty", "")
+                row.children[6].text = row_data.get("uom", "Unit")
+                row.children[5].text = row_data.get("productivity", "")
+                row.children[4].text = row_data.get("duration", "")
+                row.children[3].text = row_data.get("tpp", "Time/Person: 0")
+                row.children[2].text = row_data.get("manpower", "Manpower : 0")
+                row.children[1].text = row_data.get("salary_month", "Salary/Month : Rp0")
+                row.children[0].text = row_data.get("total_salary", "Total Salary : Rp0")
+            
+            print("Data loaded successfully.")
+        except (FileNotFoundError, json.JSONDecodeError) as e:
+            print(f"Failed to load data: {e}")
+
         
 
 if __name__ == '__main__':

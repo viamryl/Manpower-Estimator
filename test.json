@@ -1,0 +1,61 @@
+{
+    "salary_input": "",
+    "profit_percentage": "",
+    "rows": [
+        {
+            "label": "Stainless Steel",
+            "qty": "",
+            "uom": "Unit",
+            "productivity": "",
+            "duration": "",
+            "tpp": "Time/Person: 0",
+            "manpower": "Manpower : 0",
+            "salary_month": "Salary/Month : Rp0",
+            "total_salary": "Total Salary : Rp0"
+        },
+        {
+            "label": "Carbon Steel",
+            "qty": "",
+            "uom": "Unit",
+            "productivity": "",
+            "duration": "",
+            "tpp": "Time/Person: 0",
+            "manpower": "Manpower : 0",
+            "salary_month": "Salary/Month : Rp0",
+            "total_salary": "Total Salary : Rp0"
+        },
+        {
+            "label": "Steel Structure",
+            "qty": "6000",
+            "uom": "TON",
+            "productivity": "",
+            "duration": "",
+            "tpp": "Time/Person: 6000",
+            "manpower": "Manpower : 6000",
+            "salary_month": "Salary/Month : Rp6,000",
+            "total_salary": "Total Salary : Rp240"
+        },
+        {
+            "label": "Rotatic Equipment",
+            "qty": "1000",
+            "uom": "TON",
+            "productivity": "0.2",
+            "duration": "160",
+            "tpp": "Time/Person: 5000",
+            "manpower": "Manpower : 31",
+            "salary_month": "Salary/Month : Rp31",
+            "total_salary": "Total Salary : Rp200"
+        },
+        {
+            "label": "Static Equipment",
+            "qty": "3000",
+            "uom": "TON",
+            "productivity": "0.6",
+            "duration": "90",
+            "tpp": "Time/Person: 5000",
+            "manpower": "Manpower : 56",
+            "salary_month": "Salary/Month : Rp56",
+            "total_salary": "Total Salary : Rp200"
+        }
+    ]
+}
