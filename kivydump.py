@@ -7,6 +7,8 @@ from kivy.uix.textinput import TextInput
 from kivy.uix.spinner import Spinner
 from kivy.uix.scrollview import ScrollView
 from kivy.core.window import Window
+from kivy.uix.button import Button
+from kivy.uix.widget import Widget
 import locale
 
 locale.setlocale(locale.LC_ALL, '')
@@ -107,9 +109,23 @@ class ManpowerCalculatorApp(App):
 
         self.footer_layout.add_widget(self.footer_sub_layout)
         
-        self.root.add_widget(self.footer_layout)
+        button_layout = BoxLayout(orientation='horizontal', size_hint=(1, None), height=40)
 
-        # self.root.add_widget(self.footer_layout)
+        self.compare_button = Button(text="Compare", size_hint_y=None, size_hint_x = None, pos_hint = {"right" : 1}, halign = 'right', height = 40, width = 130)
+        self.compare_button.bind(on_press=self.compare_footer)
+
+        self.reset_button = Button(text="Reset", size_hint_y=None, size_hint_x = None, pos_hint = {"right" : 1}, halign = 'right', height = 40, width = 120)
+        self.reset_button.bind(on_press=self.clear_comparison)
+        
+        button_layout.add_widget(Widget())
+        button_layout.add_widget(self.compare_button)
+        button_layout.add_widget(self.reset_button)
+
+        self.root.add_widget(self.footer_layout)
+        self.root.add_widget(button_layout)
+
+        self.comparison_layout = BoxLayout(orientation='horizontal', size_hint_y=None, height=50, padding=(10, 0), spacing=10)
+        self.root.add_widget(self.comparison_layout)
 
         # List untuk menyimpan referensi ke setiap label hasil
         self.tpps = []
@@ -273,6 +289,29 @@ class ManpowerCalculatorApp(App):
         self.revenue.text = "Revenue : Rp{:,.0f}".format(revenue)
         self.profit.text = "Profit : Rp{:,.0f}".format(profit_total)
         self.total_people.text = f"Total People : {mp*1.40:.0f}"
+
+    def clear_comparison(self, instance):
+        self.comparison_layout.clear_widgets()
+
+    def compare_footer(self, instance):
+        # Simpan nilai footer saat ini
+        self.comparison_layout.clear_widgets()
+        snapshot = {
+            "total_salary": self.sum_salary.text,
+            "revenue": self.revenue.text,
+            "profit": self.profit.text,
+            "total_people": self.total_people.text
+        }
+        
+        # Tampilkan snapshot di atas footer utama
+        snapshot_layout = BoxLayout(orientation='horizontal', size_hint_y=None, height=50, padding=(10, 0), spacing=10)
+        snapshot_layout.add_widget(Label(text=f"[Previous] {snapshot['total_salary']}"))
+        snapshot_layout.add_widget(Label(text=f"[Previous] {snapshot['revenue']}"))
+        snapshot_layout.add_widget(Label(text=f"[Previous] {snapshot['profit']}"))
+        snapshot_layout.add_widget(Label(text=f"[Previous] {snapshot['total_people']}"))
+        
+        self.comparison_layout.add_widget(snapshot_layout, index=0)
+        
         
         
 

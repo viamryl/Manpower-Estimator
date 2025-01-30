@@ -7,8 +7,8 @@ from kivy.uix.textinput import TextInput
 from kivy.uix.spinner import Spinner
 from kivy.uix.scrollview import ScrollView
 from kivy.core.window import Window
+from kivy.uix.button import Button
 import locale
-import math
 
 locale.setlocale(locale.LC_ALL, '')
 # Set ukuran jendela
@@ -17,11 +17,29 @@ Window.size = (1200, 600)
 screen_width, screen_height = Window.system_size  # Ukuran layar sistem
 Window.left = (screen_width - Window.width) // 2  # Posisi tengah horizontal
 
+class TabTextInput(TextInput):
+
+    def __init__(self, *args, **kwargs):
+        self.next = kwargs.pop('next', None)
+        super(TabTextInput, self).__init__(*args, **kwargs)
+
+    def set_next(self, next):
+        self.next = next
+
+    def _keyboard_on_key_down(self, window, keycode, text, modifiers):
+        key, key_str = keycode
+        if key in (9, 13) and self.next is not None:
+            self.next.focus = True
+            self.next.select_all()
+        else:
+            super(TabTextInput, self)._keyboard_on_key_down(window, keycode, text, modifiers)
+
 class ManpowerCalculatorApp(App):
     def build(self):
         Window.maximize()
+
         self.root = BoxLayout(orientation='vertical', padding=10, spacing=10)
-        self.title = 'Manpower Calculator'
+        self.title = 'Manpower Estimator'
 
         # Bungkus GridLayout dalam ScrollView
         scroll_view = ScrollView(size_hint=(1, 1))
@@ -32,7 +50,7 @@ class ManpowerCalculatorApp(App):
 
         # Tambahkan checkbox group
         self.add_checkbox_group("Mechanical", ["Static Equipment", "Rotatic Equipment", "Steel Structure"])
-        self.add_checkbox_group("Piping", ["Stainless", "Carbon"])
+        self.add_checkbox_group("Piping", ["Carbon Steel", "Stainless Steel"])
         self.add_checkbox_group("Insulation", ["Hot Insulation", "Cold Insulation"])
 
         # Tambahkan GridLayout ke ScrollView
@@ -50,7 +68,7 @@ class ManpowerCalculatorApp(App):
         input_layout = BoxLayout(orientation='horizontal', size_hint_y=None, height=40, spacing=10)
 
         # TextInput pertama dengan lebar 250
-        self.salary_input = TextInput(hint_text="Avg Salary (Juta Rupiah)", multiline=False, size_hint=(None, None), width=220, height=40)
+        self.salary_input = TextInput(hint_text="Avg Salary (Juta Rupiah)", multiline=False, size_hint=(None, None), width=220, height=40, write_tab = False)
         input_layout.add_widget(self.salary_input)
 
         # TextInput kedua dengan lebar 250
@@ -91,8 +109,6 @@ class ManpowerCalculatorApp(App):
         self.footer_layout.add_widget(self.footer_sub_layout)
         
         self.root.add_widget(self.footer_layout)
-
-        # self.root.add_widget(self.footer_layout)
 
         # List untuk menyimpan referensi ke setiap label hasil
         self.tpps = []
@@ -141,7 +157,7 @@ class ManpowerCalculatorApp(App):
         row_layout.add_widget(Label(text=label_text, size_hint_y=None, height=self.height, size_hint_x = None, width = 150))
 
         # Kolom QTY
-        qty_input = TextInput(hint_text="QTY", size_hint_y=None, height=self.height, size_hint_x = None, width = 100)
+        qty_input = TextInput(hint_text="QTY", multiline=False, size_hint_y=None, height=self.height, size_hint_x = None, width = 100, write_tab = False)
         row_layout.add_widget(qty_input)
 
         # Kolom UOM
@@ -149,11 +165,11 @@ class ManpowerCalculatorApp(App):
         row_layout.add_widget(uom_spinner)
 
         # Kolom Productivity
-        productivity_input = TextInput(hint_text="Productivity", multiline=False, size_hint_y=None, height=self.height)
+        productivity_input = TextInput(hint_text="Productivity", multiline=False, size_hint_y=None, height=self.height, write_tab = False)
         row_layout.add_widget(productivity_input)
 
         # Kolom Duration
-        duration_input = TextInput(hint_text="Duration (day)", multiline=False, size_hint_y=None, height=self.height)
+        duration_input = TextInput(hint_text="Duration (day)", multiline=False, size_hint_y=None, height=self.height, write_tab = False)
         row_layout.add_widget(duration_input)
 
         # Kolom untuk hasil operasi matematika
@@ -255,7 +271,7 @@ class ManpowerCalculatorApp(App):
         mp = int(self.total_manpower.text.replace("Total Manpower: ",""))
         self.revenue.text = "Revenue : Rp{:,.0f}".format(revenue)
         self.profit.text = "Profit : Rp{:,.0f}".format(profit_total)
-        self.total_people.text = f"Total People : {mp*1.40}"
+        self.total_people.text = f"Total People : {mp*1.40:.0f}"
         
         
 
