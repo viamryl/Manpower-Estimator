@@ -18,22 +18,22 @@ Window.size = (1200, 600)
 screen_width, screen_height = Window.system_size  # Ukuran layar sistem
 Window.left = (screen_width - Window.width) // 2  # Posisi tengah horizontal
 
-class TabTextInput(TextInput):
+# class TabTextInput(TextInput):
 
-    def __init__(self, *args, **kwargs):
-        self.next = kwargs.pop('next', None)
-        super(TabTextInput, self).__init__(*args, **kwargs)
+#     def __init__(self, *args, **kwargs):
+#         self.next = kwargs.pop('next', None)
+#         super(TabTextInput, self).__init__(*args, **kwargs)
 
-    def set_next(self, next):
-        self.next = next
+#     def set_next(self, next):
+#         self.next = next
 
-    def _keyboard_on_key_down(self, window, keycode, text, modifiers):
-        key, key_str = keycode
-        if key in (9, 13) and self.next is not None:
-            self.next.focus = True
-            self.next.select_all()
-        else:
-            super(TabTextInput, self)._keyboard_on_key_down(window, keycode, text, modifiers)
+#     def _keyboard_on_key_down(self, window, keycode, text, modifiers):
+#         key, key_str = keycode
+#         if key in (9, 13) and self.next is not None:
+#             self.next.focus = True
+#             self.next.select_all()
+#         else:
+#             super(TabTextInput, self)._keyboard_on_key_down(window, keycode, text, modifiers)
 
 class ManpowerCalculatorApp(App):
     def build(self):
@@ -66,60 +66,73 @@ class ManpowerCalculatorApp(App):
         self.footer_layout = BoxLayout(orientation='vertical', size_hint_y=None, height=100, padding=(10, 0), spacing=10)
 
         # Baris pertama footer: TextInput untuk perhitungan matematika
+        input_layout0 = BoxLayout(orientation='horizontal', size_hint_y=None, height=40, spacing=10)
         input_layout = BoxLayout(orientation='horizontal', size_hint_y=None, height=40, spacing=10)
 
+        input_layout0.add_widget(Widget())
+
         # TextInput pertama dengan lebar 250
-        self.salary_input = TextInput(hint_text="Avg Salary (Juta Rupiah)", multiline=False, size_hint=(None, None), width=220, height=40)
-        input_layout.add_widget(self.salary_input)
+        self.salary_input = TextInput(hint_text="Avg Salary (Juta Rupiah)", multiline=False, size_hint=(None, None), width=250, height=40, write_tab = False)
+        input_layout0.add_widget(self.salary_input)
 
         # TextInput kedua dengan lebar 250
-        self.profit_percentage = TextInput(hint_text="Profit Percentage (0.0 - 1.0)", multiline=False, size_hint=(None, None), width=250, height=40)
-        input_layout.add_widget(self.profit_percentage)
+        self.profit_percentage = TextInput(hint_text="Profit Percentage (%)", multiline=False, size_hint=(None, None), width=250, height=40, write_tab = False)
+        input_layout0.add_widget(self.profit_percentage)
+
+        input_layout0.add_widget(Widget())
+
+        input_layout.add_widget(Widget())
 
         # Label total salary
-        self.sum_salary = Label(text="Sum Salary : 0", size_hint_y=None, height=self.height, size_hint_x = None, width = 350, halign='left')
+        self.sum_salary = Label(text="Sum Salary : 0", size_hint_y=None, height=self.height, size_hint_x = None, width = 350)
         self.sum_salary.bind(size=self.sum_salary.setter('text_size'))
         input_layout.add_widget(self.sum_salary)
 
-        self.revenue = Label(text="Revenue : 0", size_hint_y=None, height=self.height, size_hint_x = None, width = 350, halign='left')
+        self.revenue = Label(text="Revenue : 0", size_hint_y=None, height=self.height, size_hint_x = None, width = 350)
         self.revenue.bind(size=self.revenue.setter('text_size'))
         input_layout.add_widget(self.revenue)
 
-        self.profit = Label(text="Profit : 0", size_hint_y=None, height=self.height, size_hint_x = None, width = 350, halign='left')
+        self.profit = Label(text="Profit : 0", size_hint_y=None, height=self.height, size_hint_x = None, width = 350)
         self.profit.bind(size=self.profit.setter('text_size'))
         input_layout.add_widget(self.profit)
 
+        input_layout.add_widget(Widget())
+
         # Menambahkan input_layout ke footer_layout
+        self.footer_layout.add_widget(input_layout0)
         self.footer_layout.add_widget(input_layout)
 
         # Baris kedua footer: Layout untuk total TPP dan Manpower
         self.footer_sub_layout = BoxLayout(size_hint_y=None, height=50, padding=(10, 0), spacing=10)
 
-        self.total_tpp = Label(text="Total Time/Person: 0", size_hint_x=None, halign='left', valign='middle', width =300)
+        self.footer_sub_layout.add_widget(Widget())
+
+        self.total_tpp = Label(text="Total Time/Person: 0", size_hint_y=None, height=self.height, size_hint_x = None, width = 350)
         self.total_tpp.bind(size=self.total_tpp.setter('text_size'))
         self.footer_sub_layout.add_widget(self.total_tpp)
 
-        self.total_manpower = Label(text="Total Manpower : 0", size_hint_x=None, halign='left', valign='middle', width = 300)
+        self.total_manpower = Label(text="Total Manpower : 0", size_hint_y=None, height=self.height, size_hint_x = None, width = 350)
         self.total_manpower.bind(size=self.total_manpower.setter('text_size'))
         self.footer_sub_layout.add_widget(self.total_manpower)
 
-        self.total_people = Label(text="Total People : 0", size_hint_x=None, halign='left', valign='middle', width = 300)
+        self.total_people = Label(text="Total People : 0", size_hint_y=None, height=self.height, size_hint_x = None, width = 350)
         self.total_people.bind(size=self.total_people.setter('text_size'))
         self.footer_sub_layout.add_widget(self.total_people)
+
+        self.footer_sub_layout.add_widget(Widget())
 
         self.footer_layout.add_widget(self.footer_sub_layout)
         
         button_layout = BoxLayout(orientation='horizontal', size_hint=(1, None), height=40)
-
         self.compare_button = Button(text="Compare", size_hint_y=None, size_hint_x = None, pos_hint = {"right" : 1}, halign = 'right', height = 40, width = 130)
         self.compare_button.bind(on_press=self.compare_footer)
-
         self.reset_button = Button(text="Reset", size_hint_y=None, size_hint_x = None, pos_hint = {"right" : 1}, halign = 'right', height = 40, width = 120)
         self.reset_button.bind(on_press=self.clear_comparison)
         
         button_layout.add_widget(Widget())
         button_layout.add_widget(self.compare_button)
         button_layout.add_widget(self.reset_button)
+        button_layout.add_widget(Widget())
 
         self.root.add_widget(self.footer_layout)
         self.root.add_widget(button_layout)
@@ -127,11 +140,17 @@ class ManpowerCalculatorApp(App):
         self.comparison_layout = BoxLayout(orientation='horizontal', size_hint_y=None, height=50, padding=(10, 0), spacing=10)
         self.root.add_widget(self.comparison_layout)
 
+        self.compare = BoxLayout(orientation='horizontal', size_hint_y=None, height=50, padding=(10, 0), spacing=10)
+        self.root.add_widget(self.compare)
+
         # List untuk menyimpan referensi ke setiap label hasil
         self.tpps = []
         self.tms =[]
         self.spm = []
         self.ts = []
+        self.comparison = []
+
+        self.comparison_ison = False
 
         return self.root
 
@@ -211,8 +230,8 @@ class ManpowerCalculatorApp(App):
         # Fungsi untuk menghitung hasil secara real-time
         def calculate_result(*args):
             try:
-                print("Calculate Result Triggered")
-                print(f"QTY: {qty_input.text}, Productivity: {productivity_input.text}, Duration: {duration_input.text}")
+                # print("Calculate Result Triggered")
+                # print(f"QTY: {qty_input.text}, Productivity: {productivity_input.text}, Duration: {duration_input.text}")
                 qty = float(qty_input.text) if qty_input.text else 0
                 prod = float(productivity_input.text) if productivity_input.text else 1  # Default 1 jika kosong
                 dur = float(duration_input.text) if duration_input.text else 1
@@ -281,7 +300,7 @@ class ManpowerCalculatorApp(App):
         self.sum_salary.text = "Sum Salary : Rp{:,.0f}".format(sum_salary_total)
 
         # Calculate Revenue
-        profit_percentage = float(self.profit_percentage.text) if self.profit_percentage.text else 0
+        profit_percentage = (float(self.profit_percentage.text)*0.01) if self.profit_percentage.text else 0
         revenue = sum_salary_total * (1 + profit_percentage)
         profit_total = sum_salary_total*profit_percentage
 
@@ -290,11 +309,18 @@ class ManpowerCalculatorApp(App):
         self.profit.text = "Profit : Rp{:,.0f}".format(profit_total)
         self.total_people.text = f"Total People : {mp*1.40:.0f}"
 
+        self.compared(sum_salary_total, revenue, profit_total, mp*1.40)
+
+
     def clear_comparison(self, instance):
         self.comparison_layout.clear_widgets()
+        self.comparison.clear()
+        self.compare.clear_widgets()
+        self.comparison_ison = False
 
     def compare_footer(self, instance):
         # Simpan nilai footer saat ini
+        self.comparison_ison = True
         self.comparison_layout.clear_widgets()
         snapshot = {
             "total_salary": self.sum_salary.text,
@@ -302,6 +328,11 @@ class ManpowerCalculatorApp(App):
             "profit": self.profit.text,
             "total_people": self.total_people.text
         }
+
+        self.comparison.append(self.sum_salary.text)
+        self.comparison.append(self.revenue.text)
+        self.comparison.append(self.profit.text)
+        self.comparison.append(self.total_people.text)
         
         # Tampilkan snapshot di atas footer utama
         snapshot_layout = BoxLayout(orientation='horizontal', size_hint_y=None, height=50, padding=(10, 0), spacing=10)
@@ -311,9 +342,32 @@ class ManpowerCalculatorApp(App):
         snapshot_layout.add_widget(Label(text=f"[Previous] {snapshot['total_people']}"))
         
         self.comparison_layout.add_widget(snapshot_layout, index=0)
-        
-        
-        
+        # print(self.comparison_layout)
+
+    def compared(self, sumsal, rev, prof, totpeo):
+        if self.comparison_ison is True :
+            self.compare.clear_widgets()
+            self.comparison[0] = self.comparison[0].replace("Sum Salary : Rp", "").replace(",","")
+            self.comparison[1] = self.comparison[1].replace("Revenue : Rp", "").replace(",","")
+            self.comparison[2] = self.comparison[2].replace("Profit : Rp", "").replace(",","")
+            self.comparison[3] = self.comparison[3].replace("Total People : ", "").replace(",","")
+
+            
+            pre_sumsalary = int(self.comparison[0])
+            pre_revenue = int(self.comparison[1])
+            pre_profit = int(self.comparison[2])
+            pre_totalpeople = int(self.comparison[3])
+
+            compare_sumsalary = pre_sumsalary - sumsal
+            # compare_revenue = pre_revenue - rev
+            compare_profit = pre_revenue - sumsal
+            compare_totalpeople = pre_totalpeople - totpeo
+
+            self.compare.add_widget(Label(text=f"[Difference] Salary Rp{compare_sumsalary:,.0f}"))
+            # self.compare.add_widget(Label(text=f"[Difference] Revenue Rp{compare_revenue:,.0f}"))
+            self.compare.add_widget(Label(text=f"[Difference] Profit Rp{compare_profit:,.0f}"))
+            self.compare.add_widget(Label(text=f"[Difference] Total People {compare_totalpeople:,.0f}"))
+
 
 if __name__ == '__main__':
     ManpowerCalculatorApp().run()
